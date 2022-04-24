@@ -54,6 +54,35 @@ router.post('/', (req, res) => {
         });
 });
 
+// route to be used for verfying the user
+router.post('/login', (req,res)=>{
+    // QUERY OPERATION WILL GO HERE
+    // expects {email: 'lernantino@gmail.com', password: 'password1234'}
+    // query teh table using findOne()
+    User.findOne({
+        // find where the email is equal to the email in the requested body
+        where: {
+            email: req.body.email
+        }
+    }).then(dbUserData => {
+        if (!dbUserData) {
+            res.status(400).json({ message: 'No user with that email address!' });
+            return;
+        }
+        
+        // Verify user
+        // check that the password received is true from the checkPassword method from the user object
+        const validPassword = dbUserData.checkPassword(req.body.password);
+        // condidtional to check if the passwrod is valid
+        if (!validPassword) {
+            res.status(400).json({ message: 'Incorrect password!' });
+            return;
+          }
+        res.json({ user: dbUserData, message: 'You are now logged in!' });
+
+    });
+});
+
 // PUT /api/users/1
 router.put('/:id', (req, res) => {
     // expects {username: 'Lernantino', email: 'lernantino@gmail.com', password: 'password1234'}
