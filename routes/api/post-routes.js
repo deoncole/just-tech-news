@@ -1,7 +1,7 @@
 // require the express router
 const router = require('express').Router();
 // require the models that created the table
-const { Post, User, Vote } = require('../../models');
+const { Post, User, Vote, Comment } = require('../../models');
 const sequelize = require('../../config/connection');
 
 // get all users
@@ -18,6 +18,14 @@ router.get('/', (req, res) => {
       order: [['created_at', 'DESC']],
       // JOIN the tables by using the INCLUDE property. this will be joined on the username by referencing the username from the User Model
       include: [
+        {
+          model: Comment,
+          attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+          include: {
+            model: User,
+            attributes: ['username']
+          }
+        },
         {
           model: User,
           attributes: ['username']
