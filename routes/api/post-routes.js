@@ -1,7 +1,8 @@
 // require the express router
 const router = require('express').Router();
 // require the models that created the table
-const { Post, User } = require('../../models');
+const { Post, User, Vote } = require('../../models');
+const sequelize = require('../../config/connection');
 
 // get all users
 router.get('/', (req, res) => {
@@ -9,7 +10,10 @@ router.get('/', (req, res) => {
     Post.findAll({
       // Query configuration
       // get the attributes that will be used for the sql JOIN
-      attributes: ['id', 'post_url', 'title', 'created_at'],
+      attributes: [
+          'id', 'post_url', 'title', 'created_at',
+          [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+        ],
       // order the posts by decending order
       order: [['created_at', 'DESC']],
       // JOIN the tables by using the INCLUDE property. this will be joined on the username by referencing the username from the User Model
@@ -34,7 +38,10 @@ router.get('/:id', (req, res) => {
       where: {
         id: req.params.id
       },
-      attributes: ['id', 'post_url', 'title', 'created_at'],
+      attributes: [
+          'id', 'post_url', 'title', 'created_at',
+          [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+        ],
       include: [
         {
           model: User,
@@ -69,6 +76,17 @@ router.get('/:id', (req, res) => {
           res.status(500).json(err);
       });
   });
+
+// PUT /api/posts/upvote
+router.put('/upvote', (req, res) => {
+    // custom static method created in models/Post.js
+  Post.upvote(req.body, { Vote })
+  .then(updatedPostData => res.json(updatedPostData))
+  .catch(err => {
+    console.log(err);
+    res.status(400).json(err);
+  });
+});
 
 // update a Post's title
 router.put('/:id', (req, res) => {

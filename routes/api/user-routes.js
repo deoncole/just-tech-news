@@ -1,7 +1,7 @@
 // require the express router
 const router = require('express').Router();
 // require models files with the User object
-const {User} = require('../../models');
+const {User, Post, Vote} = require('../../models');
 
 // use the four main methods for routes
 // GET /api/users
@@ -24,7 +24,19 @@ router.get('/:id', (req, res) => {
         attributes: { exclude: ['password'] },
         where: {
           id: req.params.id
-        }
+        },
+        include: [
+            {
+              model: Post,
+              attributes: ['id', 'title', 'post_url', 'created_at']
+            },
+            {
+              model: Post,
+              attributes: ['title'],
+              through: Vote,
+              as: 'voted_posts'
+            }
+          ]
       })
         .then(dbUserData => {
           if (!dbUserData) {
