@@ -4,6 +4,8 @@ const User = require('./User');
 const Post = require('./Post');
 // require the data from the Vote model
 const Vote = require('./Vote');
+// require the data from the Comment model
+const Comment = require('./Comment');
 
 // create associations to how the tables will relate to each other setting the user id as the foreign key
 User.hasMany(Post, {
