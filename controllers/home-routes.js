@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const sequelize = require('../config/connection');
 const { Post, User, Comment, Vote } = require('../models');
+// import the funcution to check if an authorized user in logged in
+const withAuth = require('../utils/auth');
 
 // get all posts for homepage
 router.get('/', (req, res) => {
